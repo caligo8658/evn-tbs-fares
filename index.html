@@ -94,6 +94,12 @@
 
   <h2>Подбор под поездку</h2>
   <form id="planner" class="planner">
+    <label>Маршрут
+      <select id="p-dir">
+        <option value="evn" selected>Ереван → Тбилиси → Ереван</option>
+        <option value="tbs">Тбилиси → Ереван → Тбилиси</option>
+      </select>
+    </label>
     <label>Вылет примерно
       <input type="date" id="p-date" required>
     </label>
@@ -223,13 +229,14 @@
       <span class="total">~$${Math.round(c.total)}</span>
     </div>`;
 
-  function planTrip(targetIso, days, flex) {
+  function planTrip(targetIso, days, flex, dir) {
+    const [legsOut, legsBack] = dir === 'tbs' ? [backs, outs] : [outs, backs];
     const target = toDate(targetIso);
     const durTol = Math.min(3, Math.max(1, Math.round(days / 3)));
     const all = [];
-    for (const o of outs) {
+    for (const o of legsOut) {
       const dateDelta = Math.round(Math.abs(toDate(o.date) - target) / day);
-      for (const b of backs) {
+      for (const b of legsBack) {
         if (b.date < o.date) continue;
         const nights = Math.round((toDate(b.date) - toDate(o.date)) / day);
         const durDelta = Math.abs(nights - days);
@@ -259,7 +266,8 @@
     e.preventDefault();
     const days = +document.getElementById('p-days').value;
     const flex = +document.getElementById('p-flex').value;
-    const { res, widened, durTol } = planTrip(pDate.value, days, flex);
+    const dir = document.getElementById('p-dir').value;
+    const { res, widened, durTol } = planTrip(pDate.value, days, flex, dir);
     if (!res.length) {
       pOut.innerHTML = `<p class="hint">Ничего не нашлось даже в расширенном окне — данные есть только на даты
         ${allOutDates[0] || '—'} … ${allOutDates[allOutDates.length - 1] || '—'} (собираем ~4 месяца вперёд).</p>`;
