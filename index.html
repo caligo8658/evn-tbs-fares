@@ -50,6 +50,26 @@
   .weekend { color: var(--warn); }
   .dim { color: var(--muted); }
   a { color: var(--accent); }
+  .planner {
+    display: flex; gap: 14px; align-items: flex-end; flex-wrap: wrap;
+    background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+    padding: 14px 16px; margin-bottom: 14px;
+  }
+  .planner label { display: flex; flex-direction: column; gap: 4px; font-size: .82rem; color: var(--muted); }
+  .planner input, .planner select {
+    font: inherit; color: var(--fg); background: var(--bg);
+    border: 1px solid var(--line); border-radius: 7px; padding: 6px 10px;
+  }
+  .planner button {
+    font: inherit; font-weight: 600; color: var(--bg); background: var(--accent);
+    border: none; border-radius: 7px; padding: 8px 18px; cursor: pointer;
+  }
+  .planner button:focus-visible, .planner input:focus-visible, .planner select:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 1px;
+  }
+  .hint { color: var(--muted); font-size: .88rem; margin: 6px 0 10px; }
+  .badge.exact { color: var(--accent); border-color: var(--accent); }
+  .badge.off { color: var(--warn); border-color: var(--warn); }
   footer { margin-top: 36px; color: var(--muted); font-size: .82rem; }
   footer li { margin: 4px 0; }
 </style>
@@ -71,6 +91,25 @@
       <a href="https://bookings.flyone.eu/" target="_blank" rel="noopener">бронирование</a></small>
     </div>
   </div>
+
+  <h2>Подбор под поездку</h2>
+  <form id="planner" class="planner">
+    <label>Вылет примерно
+      <input type="date" id="p-date" required>
+    </label>
+    <label>Дней там
+      <input type="number" id="p-days" value="3" min="0" max="30" required>
+    </label>
+    <label>Гибкость дат
+      <select id="p-flex">
+        <option value="2">±2 дня</option>
+        <option value="4" selected>±4 дня</option>
+        <option value="7">±7 дней</option>
+      </select>
+    </label>
+    <button type="submit">Подобрать</button>
+  </form>
+  <div id="p-results"></div>
 
   <h2>Самые дешёвые туда-обратно</h2>
   <div id="combos"></div>
@@ -171,6 +210,73 @@
         обратно: ${c.b.label}<span class="badge">${c.b.who}</span></small></span>
       <span class="total">~$${Math.round(c.total)}</span>
     </div>`).join('') || '<p class="dim">Нет данных для связок.</p>';
+
+  // ---- планировщик поездки ----
+  const day = 864e5;
+  const toDate = iso => new Date(iso + 'T00:00:00');
+  const comboCard = (c, extra) => `
+    <div class="combo">
+      <span>${fmtDate(c.o.date)} → ${fmtDate(c.b.date)}
+        <span class="dim">(${c.nights === 0 ? 'в тот же день' : c.nights + ' ноч.'})</span>${extra || ''}<br>
+        <small class="dim">туда: ${c.o.label}<span class="badge">${c.o.who}</span> ·
+        обратно: ${c.b.label}<span class="badge">${c.b.who}</span></small></span>
+      <span class="total">~$${Math.round(c.total)}</span>
+    </div>`;
+
+  function planTrip(targetIso, days, flex) {
+    const target = toDate(targetIso);
+    const durTol = Math.min(3, Math.max(1, Math.round(days / 3)));
+    const all = [];
+    for (const o of outs) {
+      const dateDelta = Math.round(Math.abs(toDate(o.date) - target) / day);
+      for (const b of backs) {
+        if (b.date < o.date) continue;
+        const nights = Math.round((toDate(b.date) - toDate(o.date)) / day);
+        const durDelta = Math.abs(nights - days);
+        all.push({ o, b, nights, dateDelta, durDelta,
+                   total: o.usd + b.usd,
+                   score: o.usd + b.usd + 6 * dateDelta + 10 * durDelta });
+      }
+    }
+    let res = all.filter(c => c.dateDelta <= flex && c.durDelta <= durTol);
+    let widened = false;
+    if (!res.length) {
+      res = all.filter(c => c.dateDelta <= flex + 7 && c.durDelta <= durTol + 2);
+      widened = true;
+    }
+    res.sort((a, c) => a.score - c.score);
+    return { res: res.slice(0, 6), widened, durTol };
+  }
+
+  const pForm = document.getElementById('planner');
+  const pOut = document.getElementById('p-results');
+  const pDate = document.getElementById('p-date');
+  const allOutDates = [...out.keys()];
+  if (allOutDates.length) { pDate.min = allOutDates[0]; pDate.max = allOutDates[allOutDates.length - 1]; }
+  pDate.value = new Date(Date.now() + 14 * day).toISOString().slice(0, 10);
+
+  pForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const days = +document.getElementById('p-days').value;
+    const flex = +document.getElementById('p-flex').value;
+    const { res, widened, durTol } = planTrip(pDate.value, days, flex);
+    if (!res.length) {
+      pOut.innerHTML = `<p class="hint">Ничего не нашлось даже в расширенном окне — данные есть только на даты
+        ${allOutDates[0] || '—'} … ${allOutDates[allOutDates.length - 1] || '—'} (собираем ~4 месяца вперёд).</p>`;
+      return;
+    }
+    const exact = res[0].dateDelta === 0 && res[0].durDelta === 0;
+    pOut.innerHTML =
+      (widened ? `<p class="hint">В окне ±${flex} дн. вариантов нет — показываю ближайшие.</p>`
+       : exact ? '' : `<p class="hint">Точно в даты не получилось (рейсы 6 раз в неделю) — ближайшие варианты, отклонение подписано.</p>`)
+      + res.map(c => {
+          const tags = [];
+          if (c.dateDelta === 0 && c.durDelta === 0) tags.push('<span class="badge exact">точно в даты</span>');
+          if (c.dateDelta > 0) tags.push(`<span class="badge off">вылет ±${c.dateDelta} дн.</span>`);
+          if (c.durDelta > 0) tags.push(`<span class="badge off">длит. ±${c.durDelta} дн.</span>`);
+          return comboCard(c, ' ' + tags.join(' '));
+        }).join('');
+  });
 
   const upd = new Date(D.updated).toLocaleString('ru-RU');
   const errs = Object.keys(D.errors || {});
