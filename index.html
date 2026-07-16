@@ -104,12 +104,6 @@
 
   <h2>Подбор под поездку</h2>
   <form id="planner" class="planner">
-    <label>Маршрут
-      <select id="p-dir">
-        <option value="evn" selected>Ереван → Тбилиси → Ереван</option>
-        <option value="tbs">Тбилиси → Ереван → Тбилиси</option>
-      </select>
-    </label>
     <label>Вылет примерно
       <input type="date" id="p-date" required>
     </label>
@@ -238,6 +232,7 @@
   renderCombos('evn');
 
   // ---- планировщик поездки ----
+  let curDir = 'evn'; // направление задаётся стрелкой в заголовке
   const day = 864e5;
   const toDate = iso => new Date(iso + 'T00:00:00');
   const comboCard = (c, extra) => `
@@ -286,8 +281,7 @@
     e.preventDefault();
     const days = +document.getElementById('p-days').value;
     const flex = +document.getElementById('p-flex').value;
-    const dir = document.getElementById('p-dir').value;
-    const { res, widened, durTol } = planTrip(pDate.value, days, flex, dir);
+    const { res, widened, durTol } = planTrip(pDate.value, days, flex, curDir);
     if (!res.length) {
       pOut.innerHTML = `<p class="hint">Ничего не нашлось даже в расширенном окне — данные есть только на даты
         ${allOutDates[0] || '—'} … ${allOutDates[allOutDates.length - 1] || '—'} (собираем ~4 месяца вперёд).</p>`;
@@ -306,22 +300,20 @@
         }).join('');
   });
 
-  // ---- переключение направления (стрелка в заголовке <-> селектор планировщика) ----
-  const dirSel = document.getElementById('p-dir');
+  // ---- переключение направления стрелкой в заголовке ----
   function applyDir(dir) {
+    curDir = dir;
     document.getElementById('city-a').textContent = dir === 'tbs' ? 'Тбилиси' : 'Ереван';
     document.getElementById('city-b').textContent = dir === 'tbs' ? 'Ереван' : 'Тбилиси';
     const box = document.getElementById('tables');
     const first = document.getElementById(dir === 'tbs' ? 'sec-tbs' : 'sec-evn');
     if (box.firstElementChild !== first) box.insertBefore(first, box.firstElementChild);
-    dirSel.value = dir;
     renderCombos(dir);
     if (pOut.innerHTML && pForm.requestSubmit) pForm.requestSubmit(); // обновить выдачу планировщика
   }
   document.getElementById('swap').addEventListener('click', () => {
-    applyDir(dirSel.value === 'tbs' ? 'evn' : 'tbs');
+    applyDir(curDir === 'tbs' ? 'evn' : 'tbs');
   });
-  dirSel.addEventListener('change', () => applyDir(dirSel.value));
 
   const upd = new Date(D.updated).toLocaleString('ru-RU');
   const errs = Object.keys(D.errors || {});
