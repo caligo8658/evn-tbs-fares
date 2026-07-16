@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ереван ⇄ Тбилиси — прямые рейсы</title>
+<style>
+  :root {
+    --bg: #ffffff; --fg: #1a1a2e; --muted: #6b7280; --line: #e5e7eb;
+    --accent: #0f6b4f; --accent-bg: #e8f5ef; --card: #f8fafc; --warn: #92400e;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101418; --fg: #e5e7eb; --muted: #9ca3af; --line: #2b3138;
+      --accent: #4ade80; --accent-bg: #14291f; --card: #171c22; --warn: #fbbf24;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font: 16px/1.55 -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 24px 16px 48px; }
+  h1 { font-size: 1.6rem; margin: 0 0 4px; }
+  h2 { font-size: 1.15rem; margin: 32px 0 10px; }
+  .sub { color: var(--muted); font-size: .9rem; margin-bottom: 20px; }
+  .cards { display: flex; gap: 12px; flex-wrap: wrap; margin: 16px 0; }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+    padding: 12px 16px; flex: 1 1 240px;
+  }
+  .card b { display: block; margin-bottom: 2px; }
+  .card small { color: var(--muted); }
+  .combo {
+    background: var(--accent-bg); border: 1px solid var(--accent); border-radius: 10px;
+    padding: 12px 16px; margin: 8px 0; display: flex; justify-content: space-between;
+    align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .combo .total { font-size: 1.25rem; font-weight: 700; color: var(--accent); white-space: nowrap; }
+  .tablebox { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+  th, td { padding: 7px 14px; text-align: left; border-top: 1px solid var(--line); white-space: nowrap; }
+  thead th { border-top: none; background: var(--card); font-weight: 600; }
+  th.p, td.p { text-align: right; font-variant-numeric: tabular-nums; width: 27%; }
+  .best { color: var(--accent); font-weight: 700; }
+  .badge {
+    display: inline-block; font-size: .72rem; padding: 1px 7px; border-radius: 99px;
+    border: 1px solid var(--line); color: var(--muted); margin-left: 6px;
+  }
+  .weekend { color: var(--warn); }
+  .dim { color: var(--muted); }
+  a { color: var(--accent); }
+  footer { margin-top: 36px; color: var(--muted); font-size: .82rem; }
+  footer li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Ереван ⇄ Тбилиси — прямые рейсы</h1>
+  <div class="sub" id="updated">Загрузка…</div>
+
+  <div class="cards">
+    <div class="card">
+      <b>Georgian Airways (A9)</b>
+      <small>Пн / Ср / Пт · утро (из TBS ~08:20, из EVN ~09:35–10:00) ·
+      <a href="https://flights.georgian-airways.com/" target="_blank" rel="noopener">бронирование</a></small>
+    </div>
+    <div class="card">
+      <b>FlyOne Armenia (3F)</b>
+      <small>Вт / Пт / Вс · день/вечер (из TBS 12:40–20:30) ·
+      <a href="https://bookings.flyone.eu/" target="_blank" rel="noopener">бронирование</a></small>
+    </div>
+  </div>
+
+  <h2>Самые дешёвые туда-обратно</h2>
+  <div id="combos"></div>
+
+  <h2>Ереван → Тбилиси</h2>
+  <div class="tablebox"><table id="t-out"></table></div>
+
+  <h2>Тбилиси → Ереван</h2>
+  <div class="tablebox"><table id="t-in"></table></div>
+
+  <footer>
+    <ul>
+      <li>Цены A9 — кэш тарифов Airtrfx, замеченных за последние ~48 ч («цена от», не гарантирована).</li>
+      <li>Цены FlyOne — живой календарь тарифов их системы бронирования (минимальный бесбагажный тариф на дату).</li>
+      <li>Суммы связок приведены к USD по курсу EUR/USD ≈ <span id="rate"></span> для сравнения; платить будешь в валюте авиакомпании.</li>
+      <li>Пустая ячейка — на эту дату у перевозчика нет рейса или нет данных о цене.</li>
+    </ul>
+  </footer>
+</div>
+
+<script src="data.js"></script>
+<script>
+(function () {
+  const D = window.FARES_DATA;
+  if (!D) { document.getElementById('updated').textContent = 'Нет данных: запусти fetch_fares.py'; return; }
+
+  const EURUSD = 1.14;
+  document.getElementById('rate').textContent = EURUSD;
+  const WD = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+  const fmtDate = iso => {
+    const d = new Date(iso + 'T00:00:00');
+    const wd = WD[d.getDay()];
+    const s = d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' });
+    const wknd = d.getDay() === 0 || d.getDay() === 6;
+    return `${s} <span class="${wknd ? 'weekend' : 'dim'}">${wd}</span>`;
+  };
+
+  // per-direction merged map: date -> {a9: {label, usd}, f1: {label, usd}}
+  function merge(dirKey) {
+    const m = new Map();
+    const get = d => { if (!m.has(d)) m.set(d, {}); return m.get(d); };
+    for (const f of (D.a9?.[dirKey] || []))
+      get(f.date).a9 = { label: `${f.price} ${f.currency}`, usd: f.usd, seen: f.seen };
+    for (const f of (D.flyone?.[dirKey] || []))
+      get(f.date).f1 = { label: `€${f.eur}${f.soldOut ? ' (sold out)' : ''}`, usd: +(f.eur * EURUSD).toFixed(0), soldOut: f.soldOut };
+    return new Map([...m.entries()].sort());
+  }
+
+  const out = merge('evn_tbs'), back = merge('tbs_evn');
+
+  function renderTable(el, m) {
+    let html = '<thead><tr><th>Дата</th><th class="p">Georgian Airways</th><th class="p">FlyOne</th><th class="p">Минимум</th></tr></thead><tbody>';
+    for (const [date, v] of m) {
+      const prices = [v.a9?.usd, v.f1?.usd].filter(x => x != null);
+      const min = Math.min(...prices);
+      const cell = (x, isMin) => x == null ? '<td class="p dim">—</td>'
+        : `<td class="p${isMin ? ' best' : ''}">${x.label}</td>`;
+      html += `<tr><td>${fmtDate(date)}</td>`
+        + cell(v.a9, v.a9?.usd === min)
+        + cell(v.f1, v.f1?.usd === min)
+        + `<td class="p">~$${Math.round(min)}</td></tr>`;
+    }
+    el.innerHTML = html + '</tbody>';
+  }
+  renderTable(document.getElementById('t-out'), out);
+  renderTable(document.getElementById('t-in'), back);
+
+  // cheapest round trips: any outbound date, return >= outbound, best airline per leg
+  const legMin = m => [...m.entries()].map(([date, v]) => {
+    const opts = [];
+    if (v.a9) opts.push({ usd: v.a9.usd, who: 'A9', label: v.a9.label });
+    if (v.f1 && !v.f1.soldOut) opts.push({ usd: v.f1.usd, who: 'FlyOne', label: v.f1.label });
+    if (!opts.length) return null;
+    const b = opts.sort((a, c) => a.usd - c.usd)[0];
+    return { date, ...b };
+  }).filter(Boolean);
+
+  const outs = legMin(out), backs = legMin(back);
+  const combos = [];
+  for (const o of outs)
+    for (const b of backs)
+      if (b.date >= o.date) combos.push({ o, b, total: o.usd + b.usd, nights: (new Date(b.date) - new Date(o.date)) / 864e5 });
+  combos.sort((a, c) => a.total - c.total);
+
+  const seen = new Set();
+  const top = [];
+  for (const c of combos) { // максимум одна связка на дату вылета — иначе топ забьёт одна дешёвая неделя
+    if (seen.has(c.o.date)) continue;
+    seen.add(c.o.date); top.push(c);
+    if (top.length >= 6) break;
+  }
+
+  document.getElementById('combos').innerHTML = top.map(c => `
+    <div class="combo">
+      <span>${fmtDate(c.o.date)} → ${fmtDate(c.b.date)}
+        <span class="dim">(${c.nights === 0 ? 'в тот же день' : c.nights + ' ноч.'})</span><br>
+        <small class="dim">туда: ${c.o.label}<span class="badge">${c.o.who}</span> ·
+        обратно: ${c.b.label}<span class="badge">${c.b.who}</span></small></span>
+      <span class="total">~$${Math.round(c.total)}</span>
+    </div>`).join('') || '<p class="dim">Нет данных для связок.</p>';
+
+  const upd = new Date(D.updated).toLocaleString('ru-RU');
+  const errs = Object.keys(D.errors || {});
+  document.getElementById('updated').innerHTML =
+    `Данные обновлены: ${upd}` + (errs.length ? ` · <span class="weekend">ошибка источника: ${errs.join(', ')}</span>` : '');
+})();
+</script>
+</body>
+</html>
