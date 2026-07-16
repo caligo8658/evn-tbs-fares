@@ -70,13 +70,23 @@
   .hint { color: var(--muted); font-size: .88rem; margin: 6px 0 10px; }
   .badge.exact { color: var(--accent); border-color: var(--accent); }
   .badge.off { color: var(--warn); border-color: var(--warn); }
+  .swap {
+    font: inherit; color: var(--accent); background: none; border: none;
+    cursor: pointer; padding: 0 2px; line-height: 1;
+    transition: transform .25s ease;
+  }
+  .swap:hover { transform: rotate(180deg); }
+  .swap:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+  @media (prefers-reduced-motion: reduce) { .swap { transition: none; } }
   footer { margin-top: 36px; color: var(--muted); font-size: .82rem; }
   footer li { margin: 4px 0; }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>Ереван ⇄ Тбилиси — прямые рейсы</h1>
+  <h1><span id="city-a">Ереван</span> <button id="swap" class="swap" type="button"
+      title="Поменять направление" aria-label="Поменять направление">⇄</button>
+      <span id="city-b">Тбилиси</span> — прямые рейсы</h1>
   <div class="sub" id="updated">Загрузка…</div>
 
   <div class="cards">
@@ -120,11 +130,16 @@
   <h2>Самые дешёвые туда-обратно</h2>
   <div id="combos"></div>
 
-  <h2>Ереван → Тбилиси</h2>
-  <div class="tablebox"><table id="t-out"></table></div>
-
-  <h2>Тбилиси → Ереван</h2>
-  <div class="tablebox"><table id="t-in"></table></div>
+  <div id="tables">
+    <section id="sec-evn">
+      <h2>Ереван → Тбилиси</h2>
+      <div class="tablebox"><table id="t-out"></table></div>
+    </section>
+    <section id="sec-tbs">
+      <h2>Тбилиси → Ереван</h2>
+      <div class="tablebox"><table id="t-in"></table></div>
+    </section>
+  </div>
 
   <footer>
     <ul>
@@ -194,28 +209,33 @@
   }).filter(Boolean);
 
   const outs = legMin(out), backs = legMin(back);
-  const combos = [];
-  for (const o of outs)
-    for (const b of backs)
-      if (b.date >= o.date) combos.push({ o, b, total: o.usd + b.usd, nights: (new Date(b.date) - new Date(o.date)) / 864e5 });
-  combos.sort((a, c) => a.total - c.total);
 
-  const seen = new Set();
-  const top = [];
-  for (const c of combos) { // максимум одна связка на дату вылета — иначе топ забьёт одна дешёвая неделя
-    if (seen.has(c.o.date)) continue;
-    seen.add(c.o.date); top.push(c);
-    if (top.length >= 6) break;
+  function renderCombos(dir) {
+    const [legsOut, legsBack] = dir === 'tbs' ? [backs, outs] : [outs, backs];
+    const combos = [];
+    for (const o of legsOut)
+      for (const b of legsBack)
+        if (b.date >= o.date) combos.push({ o, b, total: o.usd + b.usd, nights: (new Date(b.date) - new Date(o.date)) / 864e5 });
+    combos.sort((a, c) => a.total - c.total);
+
+    const seen = new Set();
+    const top = [];
+    for (const c of combos) { // максимум одна связка на дату вылета — иначе топ забьёт одна дешёвая неделя
+      if (seen.has(c.o.date)) continue;
+      seen.add(c.o.date); top.push(c);
+      if (top.length >= 6) break;
+    }
+
+    document.getElementById('combos').innerHTML = top.map(c => `
+      <div class="combo">
+        <span>${fmtDate(c.o.date)} → ${fmtDate(c.b.date)}
+          <span class="dim">(${c.nights === 0 ? 'в тот же день' : c.nights + ' ноч.'})</span><br>
+          <small class="dim">туда: ${c.o.label}<span class="badge">${c.o.who}</span> ·
+          обратно: ${c.b.label}<span class="badge">${c.b.who}</span></small></span>
+        <span class="total">~$${Math.round(c.total)}</span>
+      </div>`).join('') || '<p class="dim">Нет данных для связок.</p>';
   }
-
-  document.getElementById('combos').innerHTML = top.map(c => `
-    <div class="combo">
-      <span>${fmtDate(c.o.date)} → ${fmtDate(c.b.date)}
-        <span class="dim">(${c.nights === 0 ? 'в тот же день' : c.nights + ' ноч.'})</span><br>
-        <small class="dim">туда: ${c.o.label}<span class="badge">${c.o.who}</span> ·
-        обратно: ${c.b.label}<span class="badge">${c.b.who}</span></small></span>
-      <span class="total">~$${Math.round(c.total)}</span>
-    </div>`).join('') || '<p class="dim">Нет данных для связок.</p>';
+  renderCombos('evn');
 
   // ---- планировщик поездки ----
   const day = 864e5;
@@ -285,6 +305,23 @@
           return comboCard(c, ' ' + tags.join(' '));
         }).join('');
   });
+
+  // ---- переключение направления (стрелка в заголовке <-> селектор планировщика) ----
+  const dirSel = document.getElementById('p-dir');
+  function applyDir(dir) {
+    document.getElementById('city-a').textContent = dir === 'tbs' ? 'Тбилиси' : 'Ереван';
+    document.getElementById('city-b').textContent = dir === 'tbs' ? 'Ереван' : 'Тбилиси';
+    const box = document.getElementById('tables');
+    const first = document.getElementById(dir === 'tbs' ? 'sec-tbs' : 'sec-evn');
+    if (box.firstElementChild !== first) box.insertBefore(first, box.firstElementChild);
+    dirSel.value = dir;
+    renderCombos(dir);
+    if (pOut.innerHTML && pForm.requestSubmit) pForm.requestSubmit(); // обновить выдачу планировщика
+  }
+  document.getElementById('swap').addEventListener('click', () => {
+    applyDir(dirSel.value === 'tbs' ? 'evn' : 'tbs');
+  });
+  dirSel.addEventListener('change', () => applyDir(dirSel.value));
 
   const upd = new Date(D.updated).toLocaleString('ru-RU');
   const errs = Object.keys(D.errors || {});
