@@ -1,5 +1,5 @@
 {
- "updated": "2026-09-29T03:27:53+00:00",
+ "updated": "2026-09-29T11:51:49+00:00",
  "a9": {
   "evn_tbs": [
    {
@@ -11,17 +11,17 @@
    },
    {
     "date": "2026-10-02",
-    "price": 87.8,
-    "currency": "USD",
-    "usd": 87.8,
-    "seen": "2026-09-28"
+    "price": 127.0,
+    "currency": "EUR",
+    "usd": 144.15,
+    "seen": "2026-09-29"
    },
    {
     "date": "2026-10-05",
-    "price": 115.7,
+    "price": 87.8,
     "currency": "USD",
-    "usd": 115.7,
-    "seen": "2026-09-28"
+    "usd": 87.8,
+    "seen": "2026-09-29"
    },
    {
     "date": "2026-10-07",
@@ -38,25 +38,18 @@
     "seen": "2026-09-28"
    },
    {
-    "date": "2026-10-12",
-    "price": 115.7,
-    "currency": "USD",
-    "usd": 115.7,
-    "seen": "2026-09-28"
-   },
-   {
     "date": "2026-10-14",
     "price": 102.0,
     "currency": "EUR",
-    "usd": 116.09,
-    "seen": "2026-09-28"
+    "usd": 115.77,
+    "seen": "2026-09-29"
    },
    {
     "date": "2026-10-16",
-    "price": 115.7,
+    "price": 115.8,
     "currency": "USD",
-    "usd": 115.7,
-    "seen": "2026-09-28"
+    "usd": 115.8,
+    "seen": "2026-09-29"
    },
    {
     "date": "2026-10-19",
@@ -66,55 +59,69 @@
     "seen": "2026-09-28"
    },
    {
-    "date": "2026-10-21",
-    "price": 144.7,
+    "date": "2026-10-26",
+    "price": 115.8,
     "currency": "USD",
-    "usd": 144.7,
-    "seen": "2026-09-28"
+    "usd": 115.8,
+    "seen": "2026-09-29"
    },
    {
-    "date": "2026-10-26",
-    "price": 315.3,
-    "currency": "GEL",
-    "usd": 120.57,
-    "seen": "2026-09-28"
+    "date": "2026-10-28",
+    "price": 144.8,
+    "currency": "USD",
+    "usd": 144.8,
+    "seen": "2026-09-29"
    },
    {
     "date": "2026-11-11",
-    "price": 392.3,
-    "currency": "GEL",
-    "usd": 150.02,
-    "seen": "2026-09-28"
+    "price": 144.8,
+    "currency": "USD",
+    "usd": 144.8,
+    "seen": "2026-09-29"
    },
    {
-    "date": "2026-11-18",
-    "price": 391.8,
-    "currency": "GEL",
-    "usd": 149.83,
-    "seen": "2026-09-28"
+    "date": "2026-11-20",
+    "price": 281.8,
+    "currency": "USD",
+    "usd": 281.8,
+    "seen": "2026-09-29"
+   },
+   {
+    "date": "2026-11-23",
+    "price": 281.8,
+    "currency": "USD",
+    "usd": 281.8,
+    "seen": "2026-09-29"
+   },
+   {
+    "date": "2026-12-14",
+    "price": 247.0,
+    "currency": "EUR",
+    "usd": 280.36,
+    "seen": "2026-09-29"
    }
   ],
   "tbs_evn": [
    {
     "date": "2026-09-30",
-    "price": 146.1,
-    "currency": "USD",
-    "usd": 146.1,
-    "seen": "2026-09-28"
+    "price": 128.16,
+    "currency": "EUR",
+    "usd": 145.47,
+    "seen": "2026-09-29"
    },
    {
     "date": "2026-10-02",
-    "price": 240.8,
-    "currency": "GEL",
-    "usd": 92.08,
-    "seen": "2026-09-28"
+    "price": 89.1,
+    "currency": "USD",
+    "usd": 89.1,
+    "seen": "2026-09-29"
    },
    {
     "date": "2026-10-05",
-    "price": 128.18,
+    "price": 128.16,
     "currency": "EUR",
-    "usd": 145.9,
-    "seen": "2026-09-28"
+    "usd": 145.47,
+    "seen": "2026-09-29"
    },
    {
     "date": "2026-10-07",
@@ -125,10 +132,10 @@
    },
    {
     "date": "2026-10-09",
-    "price": 240.8,
-    "currency": "GEL",
-    "usd": 92.08,
-    "seen": "2026-09-28"
+    "price": 89.1,
+    "currency": "USD",
+    "usd": 89.1,
+    "seen": "2026-09-29"
    },
    {
     "date": "2026-10-12",
@@ -159,13 +166,6 @@
     "seen": "2026-09-28"
    },
    {
-    "date": "2026-10-21",
-    "price": 394.8,
-    "currency": "GEL",
-    "usd": 150.98,
-    "seen": "2026-09-28"
-   },
-   {
     "date": "2026-10-23",
     "price": 103.18,
     "currency": "EUR",
@@ -181,10 +181,10 @@
    },
    {
     "date": "2026-11-11",
-    "price": 394.3,
-    "currency": "GEL",
-    "usd": 150.79,
-    "seen": "2026-09-28"
+    "price": 203.1,
+    "currency": "USD",
+    "usd": 203.1,
+    "seen": "2026-09-29"
    },
    {
     "date": "2026-11-18",
@@ -199,31 +199,19 @@
     "currency": "USD",
     "usd": 282.1,
     "seen": "2026-09-28"
-   },
-   {
-    "date": "2026-12-18",
-    "price": 282.1,
-    "currency": "USD",
-    "usd": 282.1,
-    "seen": "2026-09-28"
    }
   ]
  },
  "flyone": {
   "evn_tbs": [
    {
-    "date": "2026-09-29",
-    "eur": 96.0,
-    "soldOut": false
-   },
-   {
     "date": "2026-10-02",
-    "eur": 75.0,
+    "eur": 70.0,
     "soldOut": false
    },
    {
     "date": "2026-10-04",
-    "eur": 88.0,
+    "eur": 70.0,
     "soldOut": false
    },
    {
@@ -233,7 +221,7 @@
    },
    {
     "date": "2026-10-09",
-    "eur": 60.0,
+    "eur": 65.0,
     "soldOut": false
    },
    {
@@ -263,7 +251,7 @@
    },
    {
     "date": "2026-10-23",
-    "eur": 50.0,
+    "eur": 55.0,
     "soldOut": false
    },
    {
@@ -278,37 +266,37 @@
    },
    {
     "date": "2026-11-01",
-    "eur": 65.0,
-    "soldOut": false
-   },
-   {
-    "date": "2026-11-06",
-    "eur": 65.0,
-    "soldOut": false
-   },
-   {
-    "date": "2026-11-08",
-    "eur": 65.0,
-    "soldOut": false
-   },
-   {
-    "date": "2026-11-13",
-    "eur": 75.0,
-    "soldOut": false
-   },
-   {
-    "date": "2026-11-15",
-    "eur": 81.0,
-    "soldOut": false
-   },
-   {
-    "date": "2026-11-20",
     "eur": 60.0,
     "soldOut": false
    },
    {
-    "date": "2026-11-22",
+    "date": "2026-11-06",
+    "eur": 60.0,
+    "soldOut": false
+   },
+   {
+    "date": "2026-11-08",
+    "eur": 60.0,
+    "soldOut": false
+   },
+   {
+    "date": "2026-11-13",
     "eur": 55.0,
+    "soldOut": false
+   },
+   {
+    "date": "2026-11-15",
+    "eur": 55.0,
+    "soldOut": false
+   },
+   {
+    "date": "2026-11-20",
+    "eur": 55.0,
+    "soldOut": false
+   },
+   {
+    "date": "2026-11-22",
+    "eur": 65.0,
     "soldOut": false
    },
    {
@@ -348,7 +336,7 @@
    },
    {
     "date": "2026-12-20",
-    "eur": 70.0,
+    "eur": 81.0,
     "soldOut": false
    },
    {
@@ -364,18 +352,13 @@
   ],
   "tbs_evn": [
    {
-    "date": "2026-09-29",
-    "eur": 96.0,
-    "soldOut": false
-   },
-   {
     "date": "2026-10-02",
-    "eur": 88.0,
+    "eur": 81.0,
     "soldOut": false
    },
    {
     "date": "2026-10-04",
-    "eur": 75.0,
+    "eur": 88.0,
     "soldOut": false
    },
    {
@@ -385,27 +368,27 @@
    },
    {
     "date": "2026-10-09",
-    "eur": 65.0,
-    "soldOut": false
-   },
-   {
-    "date": "2026-10-11",
-    "eur": 60.0,
-    "soldOut": false
-   },
-   {
-    "date": "2026-10-13",
-    "eur": 60.0,
-    "soldOut": false
-   },
-   {
-    "date": "2026-10-16",
     "eur": 70.0,
     "soldOut": false
    },
    {
+    "date": "2026-10-11",
+    "eur": 70.0,
+    "soldOut": false
+   },
+   {
+    "date": "2026-10-13",
+    "eur": 70.0,
+    "soldOut": false
+   },
+   {
+    "date": "2026-10-16",
+    "eur": 65.0,
+    "soldOut": false
+   },
+   {
     "date": "2026-10-18",
-    "eur": 60.0,
+    "eur": 65.0,
     "soldOut": false
    },
    {
@@ -415,7 +398,7 @@
    },
    {
     "date": "2026-10-23",
-    "eur": 60.0,
+    "eur": 65.0,
     "soldOut": false
    },
    {
@@ -470,7 +453,7 @@
    },
    {
     "date": "2026-11-29",
-    "eur": 65.0,
+    "eur": 75.0,
     "soldOut": false
    },
    {
